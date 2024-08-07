@@ -2,9 +2,9 @@ from openai import OpenAI
 import streamlit as st
 import time
 
-client = OpenAI(api_key='sk-proj-qoQLs8hSOFtSep4g23BGT3BlbkFJYSfCp73ITuYKEGke2xw1')
+client = OpenAI(api_key=st.secrets.OPENAI_API_KEY)
 if 'message_thread' not in st.session_state:
-    st.session_state['assistant_id'] = 'asst_PcKuQubffNNu5TyKYr5sb8fK'
+    st.session_state['assistant_id'] = st.secrets.assistant_id_3
 
 
 text_input1 = ""
@@ -23,19 +23,19 @@ if add_selectbox != 'Selection':
 
     if add_selectbox == 'Lead Magnet':
         st.write('Creating Lead Magnet...')
-        st.session_state['assistant_id'] = "asst_0n0wlivNpaSDaTB1GtuUQnZZ"
+        st.session_state['assistant_id'] = st.secrets.assistant_id_1
     elif add_selectbox == 'Funnel MARATHON / WEBINAR':
         st.write('Creating WEBINAR...')
-        st.session_state['assistant_id'] = "asst_bhStJJYPcK6aqHKmehxvVjA5"
+        st.session_state['assistant_id'] = st.secrets.assistant_id_3
     elif add_selectbox == 'Warm-up plan for the product for 5 days':
         st.write('Creating Warm-up plan...')
-        st.session_state['assistant_id'] = 'asst_PcKuQubffNNu5TyKYr5sb8fK'
+        st.session_state['assistant_id'] = st.secrets.assistant_id_3
     elif add_selectbox == 'Sites':
         st.write('Creating Sites...')
-        st.session_state['assistant_id'] = "asst_r2RHPtHVjFZYUQmu3Ivyu7cE"
+        st.session_state['assistant_id'] = st.secrets.assistant_id_4
     elif add_selectbox == 'Storyteller':
         st.write('Creating Storyteller...')
-        st.session_state['assistant_id'] = "asst_7VaJubHL96a5Q9vz6VFPmHAQ"
+        st.session_state['assistant_id'] = st.secrets.assistant_id_5
 
 prompt = f"Product Data: {text_input1}, Target Audience Data: {text_input2}"
 
