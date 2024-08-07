@@ -1,6 +1,16 @@
+from openai import OpenAI
 import streamlit as st
+import time
 
-options = ['Selection', 'Lead Magnet', 'Unique Selling Proposition (USP)',
+client = OpenAI(api_key='sk-proj-qoQLs8hSOFtSep4g23BGT3BlbkFJYSfCp73ITuYKEGke2xw1')
+if 'message_thread' not in st.session_state:
+    st.session_state['assistant_id'] = 'asst_PcKuQubffNNu5TyKYr5sb8fK'
+
+
+text_input1 = ""
+text_input2 = ""
+
+options = ['Selection', 'Lead Magnet', 'Funnel MARATHON / WEBINAR',
            'Warm-up plan for the product for 5 days', 'Sites',
            'Storyteller']
 add_selectbox = st.sidebar.selectbox('What would you like to create?', options)
@@ -11,42 +21,73 @@ if add_selectbox != 'Selection':
     text_input1 = st.sidebar.text_area("Product Data")
     text_input2 = st.sidebar.text_area("Target Audience Data")
 
-if st.sidebar.button('START'):
-    if add_selectbox == 'Selection':
-        st.write('Creating Selection...')
-    elif add_selectbox == 'Lead Magnet':
+    if add_selectbox == 'Lead Magnet':
         st.write('Creating Lead Magnet...')
-    elif add_selectbox == 'Unique Selling Proposition (USP)':
-        st.write('Creating USP...')
+        st.session_state['assistant_id'] = "asst_0n0wlivNpaSDaTB1GtuUQnZZ"
+    elif add_selectbox == 'Funnel MARATHON / WEBINAR':
+        st.write('Creating WEBINAR...')
+        st.session_state['assistant_id'] = "asst_bhStJJYPcK6aqHKmehxvVjA5"
     elif add_selectbox == 'Warm-up plan for the product for 5 days':
         st.write('Creating Warm-up plan...')
+        st.session_state['assistant_id'] = 'asst_PcKuQubffNNu5TyKYr5sb8fK'
     elif add_selectbox == 'Sites':
         st.write('Creating Sites...')
+        st.session_state['assistant_id'] = "asst_r2RHPtHVjFZYUQmu3Ivyu7cE"
     elif add_selectbox == 'Storyteller':
         st.write('Creating Storyteller...')
+        st.session_state['assistant_id'] = "asst_7VaJubHL96a5Q9vz6VFPmHAQ"
 
-st.title("Echo Bot")
+prompt = f"Product Data: {text_input1}, Target Audience Data: {text_input2}"
 
-# Initialize chat history
-if "messages" not in st.session_state:
-    st.session_state.messages = []
+if st.sidebar.button('START'):
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
 
-# Display chat messages from history on app rerun
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
 
-# React to user input
-if prompt := st.chat_input("What is up?"):
-    # Display user message in chat message container
-    st.chat_message("user").markdown(prompt)
-    # Add user message to chat history
     st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.markdown(prompt)
 
-    response = f"Echo: {prompt}"
-    # Display assistant response in chat message container
     with st.chat_message("assistant"):
-        st.markdown(response)
-        # st.write_stream(response)
-    # Add assistant response to chat history
+        msg = ""
+        if 'message_thread' not in st.session_state:
+            st.session_state['message_thread'] = client.beta.threads.create()
+
+        with client.beta.threads.runs.stream(
+                thread_id=st.session_state.message_thread.id,
+                assistant_id=st.session_state['assistant_id']
+        ) as stream:
+
+            for event in stream:
+                # Print the text from text delta events
+                if event.event == "thread.message.delta" and event.data.delta.content:
+                    msg = msg + str(event.data.delta.content[0].text.value)
+            response = st.write(msg)
+
     st.session_state.messages.append({"role": "assistant", "content": response})
+
+
+# if "openai_model" not in st.session_state:
+#     st.session_state["openai_model"] = "gpt-3.5-turbo"
+
+if prompt2 := st.chat_input("What is up?"):
+    st.session_state.messages.append({"role": "user", "content": prompt2})
+    with st.chat_message("user"):
+        st.markdown(prompt)
+
+    with st.chat_message("assistant"):
+        msg = ""
+        with client.beta.threads.runs.stream(
+                thread_id=st.session_state.message_thread.id,
+                assistant_id=st.session_state['assistant_id']
+        ) as stream:
+            for event in stream:
+                # Print the text from text delta events
+                if event.event == "thread.message.delta" and event.data.delta.content:
+                    msg = msg + str(event.data.delta.content[0].text.value)
+            response2 = st.write(msg)
+    st.session_state.messages.append({"role": "assistant", "content": response2})
+
